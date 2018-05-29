@@ -1,5 +1,10 @@
 sudo: required
 
+env:
+  global:
+    - IMAGE="dprotsenko/fluentd"
+    - COMMIT=${TRAVIS_COMMIT::7}
+
 services:
   - docker
 
@@ -7,7 +12,7 @@ before_script:
   - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
 
 script:
-  - docker build -t .
-
-after_success:
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $COMMIT ; fi`
+  - docker build -t $IMAGE:$COMMIT .
+  - docker tag $IMAGE:$COMMIT $IMAGE:$TAG
+  - docker push $IMAGE
